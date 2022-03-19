@@ -4,6 +4,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -14,9 +15,7 @@ public abstract class Base {
         butName.getScene().getWindow().hide();
         FXMLLoader loader = new FXMLLoader();
 
-        System.out.println(window);
-
-        loader.setLocation(getClass().getResource(window));
+        loader.setLocation(getClass().getResource("/" + window));
 
         try {
             loader.load();
@@ -26,8 +25,60 @@ public abstract class Base {
 
         Parent root = loader.getRoot();
         Stage primaryStage = new Stage();
-        primaryStage.setTitle("Diary");
+        primaryStage.setTitle("Поликлиника");
         primaryStage.setScene(new Scene(root, 700, 400));
         primaryStage.showAndWait();
+    }
+
+    public void openModalWindow(String window){
+            FXMLLoader loader = new FXMLLoader();
+
+            loader.setLocation(getClass().getResource("/"+window));
+            try {
+                loader.load();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Parent root = loader.getRoot();
+            Stage modalStage = new Stage();
+            Stage thisStage = new Stage();
+            Scene secondScene = new Scene(root, 546, 289);
+
+            modalStage.setTitle("Second Stage");
+            modalStage.setScene(secondScene);
+
+            modalStage.initModality(Modality.WINDOW_MODAL);
+
+            modalStage.initOwner(thisStage);
+
+            modalStage.showAndWait();
+    }
+
+    public void openModalWindow(String window, int widht, int height){
+        FXMLLoader loader = new FXMLLoader();
+
+        loader.setLocation(getClass().getResource("/"+window));
+        try {
+            loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Parent root = loader.getRoot();
+        Stage modalStage = new Stage();
+        Stage thisStage = new Stage();
+        Scene secondScene = new Scene(root, widht, height);
+
+        modalStage.setTitle("Second Stage");
+        modalStage.setScene(secondScene);
+
+        modalStage.initModality(Modality.WINDOW_MODAL);
+
+        modalStage.initOwner(thisStage);
+
+        modalStage.showAndWait();
+    }
+
+    public void closeModalWindow(Button butName){
+        butName.getScene().getWindow().hide();
     }
 }

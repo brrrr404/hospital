@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.PatientsController">
+   <children>
+      <Label fx:id="hello" layoutX="248.0" layoutY="37.0" prefHeight="17.0" prefWidth="205.0" text="Здравствуйте, *типа имя фамилия*" />
+      <DatePicker fx:id="dateChange" layoutX="248.0" layoutY="140.0" promptText="Выбор даты" />
+      <ChoiceBox fx:id="choiceDepartment" layoutX="98.0" layoutY="90.0" prefWidth="150.0" />
+      <ChoiceBox fx:id="choiceDoctor" layoutX="422.0" layoutY="90.0" prefWidth="150.0" />
+      <Pane fx:id="div1" layoutX="90.0" layoutY="202.0" prefHeight="171.0" prefWidth="497.0">
+         <children>
+            <Button fx:id="timeButton15" layoutX="401.0" layoutY="109.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton14" layoutX="305.0" layoutY="109.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton13" layoutX="208.0" layoutY="109.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton12" layoutX="115.0" layoutY="109.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton11" layoutX="22.0" layoutY="109.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton10" layoutX="401.0" layoutY="60.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton9" layoutX="305.0" layoutY="60.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton8" layoutX="208.0" layoutY="60.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton7" layoutX="115.0" layoutY="60.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton6" layoutX="22.0" layoutY="60.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton1" layoutX="22.0" layoutY="14.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton2" layoutX="115.0" layoutY="14.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton3" layoutX="208.0" layoutY="14.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton4" layoutX="305.0" layoutY="14.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+            <Button fx:id="timeButton5" layoutX="401.0" layoutY="14.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="82.0" textAlignment="CENTER" />
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>
