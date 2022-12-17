@@ -9,8 +9,8 @@ import java.util.ResourceBundle;
 import Entity.Department;
 import Entity.Doctor;
 import Entity.Record;
-import Entity.Patient;
 import com.example.hospital.BD;
+import exception.ControllerException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -19,7 +19,6 @@ import javafx.scene.layout.Pane;
 import lombok.SneakyThrows;
 import methods.Base;
 import methods.GetData;
-import methods.User;
 
 public class PatientsController extends Base implements GetData {
 
@@ -105,6 +104,7 @@ public class PatientsController extends Base implements GetData {
 
         dateChange.setValue(LocalDate.now());
         dateChange.setOnAction(event -> {
+            validate();
             newNameButtonTime(choiceDoctor.getValue(), dateChange.getValue());
         });
 
@@ -115,6 +115,7 @@ public class PatientsController extends Base implements GetData {
         );
 
         choiceDoctor.setOnAction(event -> {
+            validate();
             newNameButtonTime(choiceDoctor.getValue(), dateChange.getValue());
         });
 
@@ -125,6 +126,15 @@ public class PatientsController extends Base implements GetData {
         }
 
 
+    }
+
+    private void validate(){
+        if(dateChange.getValue()==null){
+            new ControllerException("Не выбрана дата");
+        }
+        if(choiceDoctor.getValue()==null){
+            new ControllerException("Не выбран специалист");
+        }
     }
 
     //получаем новый список врачей определенной специальности

@@ -112,7 +112,23 @@ public class NewDoctorCreatorController extends Base implements GetData {
         List<String> times = new ArrayList<>();
         for (int i = 8; i < 20; i++) {
             for (int j = 0; j < 60; j += 15) {
-                times.add(i + ":" + j);
+                if(i<10){
+                    if (j<10){
+                        times.add("0"+i + ":" + j+"0");
+                    }
+                    else {
+                        times.add("0" + i + ":" + j);
+                    }
+                }
+                else {
+                    if(j<10){
+                        times.add(i + ":" + j+"0");
+                    }
+                    else {
+                        times.add(i + ":" + j);
+                    }
+                }
+
             }
         }
 

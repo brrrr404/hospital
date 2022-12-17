@@ -1,20 +1,22 @@
 package com.example.hospital;
 
-import Entity.*;
 import Entity.Record;
+import Entity.*;
 import exception.ControllerException;
 import lombok.SneakyThrows;
 import methods.User;
-import methods.DateAndTime;
 
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.*;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 
 public class BD {
@@ -29,35 +31,40 @@ public class BD {
 
     private Connection dbConn = null;
 
+
     // Метод для подключения к БД с использованием значений выше
     private Connection getDbConnection() throws ClassNotFoundException, SQLException {
-        String connStr = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DB_NAME;
+        String connStr = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DB_NAME + "?autoReconnect=true";
         Class.forName("com.mysql.cj.jdbc.Driver");
 
-        dbConn = DriverManager.getConnection(connStr, LOGIN, PASS);
+        try {
+            dbConn = DriverManager.getConnection(connStr, LOGIN, PASS);
+        } catch (SQLException e) {
+            new ControllerException("Нет соединения с базой данных");
+        }
+
         return dbConn;
     }
 
     //авторизация
     public User auth(String login, String password) throws SQLException, ClassNotFoundException {
-        String auth = "SELECT * FROM autorization WHERE login =? AND password=?";
+        String auth = "SELECT * FROM `autorization` WHERE login =? AND password=?";
 
         Patient patient = new Patient();
         Doctor doctor = new Doctor();
 
         PreparedStatement statement = getDbConnection().prepareStatement(auth);
-        statement.setString(1,login);
-        statement.setString(2,password);
+        statement.setString(1, login);
+        statement.setString(2, password);
         ResultSet res = statement.executeQuery();
 
         while (res.next()) {
             doctor.setId(res.getInt("id_doctor"));
             patient.setId(res.getInt("id_patient"));
         }
-        if(doctor.getID()>0){
+        if (doctor.getID() > 0) {
             return user = getDoctor(doctor.getID());
-        }
-        else if(patient.getID()>0){
+        } else if (patient.getID() > 0) {
             return user = userHello(patient.getID());
         }
         return null;
@@ -65,33 +72,33 @@ public class BD {
 
     //поиск пользователя в бд и заполнение его данных по входным данным
     public Patient userHello(Integer newUser) throws SQLException, ClassNotFoundException {
-            Patient patient = new Patient();
-            String request = "SELECT * FROM patients WHERE id_patient = " + newUser;
+        Patient patient = new Patient();
+        String request = "SELECT * FROM `patients` WHERE id_patient = " + newUser;
 
-            Statement statement = getDbConnection().createStatement();
-            ResultSet newResult = statement.executeQuery(request);
-            while (newResult.next()) {
-                patient.setId(newResult.getInt("id_patient"));
-                patient.setFio(newResult.getString("fio_patient"));
-                patient.setPlace(newResult.getString("place_of_residence"));
-                patient.setNumber(newResult.getInt("phone"));
-                patient.setMail(newResult.getString("email"));
-                patient.setMale(newResult.getString("male"));
-            }
-            return patient;
+        Statement statement = getDbConnection().createStatement();
+        ResultSet newResult = statement.executeQuery(request);
+        while (newResult.next()) {
+            patient.setId(newResult.getInt("id_patient"));
+            patient.setFio(newResult.getString("fio_patient"));
+            patient.setPlace(newResult.getString("place_of_residence"));
+            patient.setNumber(newResult.getInt("phone"));
+            patient.setMail(newResult.getString("email"));
+            patient.setMale(newResult.getString("male"));
+        }
+        return patient;
     }
 
 
-@SneakyThrows
-    public Department getDepartment(String nameDepartment){
+    @SneakyThrows
+    public Department getDepartment(String nameDepartment) {
         String request = "SELECT * FROM `department` WHERE name_department= ?";
         PreparedStatement statement = getDbConnection().prepareStatement(request);
-        statement.setString(1,nameDepartment);
+        statement.setString(1, nameDepartment);
 
         ResultSet getDepartment = statement.executeQuery();
 
         Department department = new Department();
-        while(getDepartment.next()){
+        while (getDepartment.next()) {
             department.setName(nameDepartment);
             department.setHeadOfDepartment(getDepartment.getString("head_department"));
         }
@@ -99,20 +106,20 @@ public class BD {
     }
 
     // Метод для регистрации нового пользователя
-    public int registNewUser(String name, String surname, String middleName, String email, int number, String place, String login, String password, String male) throws SQLException, ClassNotFoundException {
+    public int registNewUser(String name, String surname, String middleName, String email, Long number, String place, String login, String password, String male) throws SQLException, ClassNotFoundException {
         String newUser = "INSERT INTO `patients` (fio_patient, phone, email, place_of_residence, male) VALUES (?, ?, ?, ?, ?)";
         String userReg = "INSERT INTO `autorization` (id_patient, login, password) VALUES (?, ?, ?)";
-        String idUser = "SELECT * FROM patients WHERE id_patient=(SELECT MAX(id_patient) FROM patients)";
+        String idUser = "SELECT * FROM `patients` WHERE id_patient=(SELECT MAX(id_patient) FROM patients)";
 
         //передаем информацию о новом пользователе без пароля и логина
         PreparedStatement prStUser = getDbConnection().prepareStatement(newUser);
         prStUser.setString(1, surname + " " + name + " " + middleName);
-        prStUser.setInt(2, number);
+        prStUser.setLong(2, number);
         prStUser.setString(3, email);
         prStUser.setString(4, place);
         prStUser.setString(5, male);
 
-        if(prStUser.executeUpdate()<=0){
+        if (prStUser.executeUpdate() <= 0) {
             new ControllerException("Ошибка регистрации!");
         }
 
@@ -149,28 +156,28 @@ public class BD {
 
         res.next();
 
-        return res.getRow()!= 0;
+        return res.getRow() != 0;
     }
 
     //получаем доктора по id в момент авторизации
     @SneakyThrows
-    public Doctor getDoctor(Integer idDoctor){
+    public Doctor getDoctor(Integer idDoctor) {
         Doctor doctor = new Doctor();
-            String request = "SELECT * FROM `doctors` WHERE id_doctor=?";
-            PreparedStatement statement = getDbConnection().prepareStatement(request);
-            statement.setInt(1,idDoctor);
+        String request = "SELECT * FROM doctors WHERE id_doctor=?";
+        PreparedStatement statement = getDbConnection().prepareStatement(request);
+        statement.setInt(1, idDoctor);
 
-            ResultSet getDoctor = statement.executeQuery();
-            while (getDoctor.next()) {
-                doctor.setId(getDoctor.getInt("id_doctor"));
-                doctor.setName(getDoctor.getString("fio_doctor"));
-                doctor.setDepartment(getDepartment(getDoctor.getString("name_department")));
-                doctor.setAppointment(getDoctor.getString("appointment"));
-            }
-            return doctor;
+        ResultSet getDoctor = statement.executeQuery();
+        while (getDoctor.next()) {
+            doctor.setId(getDoctor.getInt("id_doctor"));
+            doctor.setName(getDoctor.getString("fio_doctor"));
+            doctor.setDepartment(getDepartment(getDoctor.getString("name_department")));
+            doctor.setAppointment(getDoctor.getString("appointment"));
+        }
+        return doctor;
     }
 
-  //получаем доктора по ФИО в момент выбора врача пациентом
+    //получаем доктора по ФИО в момент выбора врача пациентом
     @SneakyThrows
     public Doctor getDoctor(String fioDoctor) {
         String sql = "SELECT * FROM doctors WHERE fio_doctor=?";
@@ -251,20 +258,28 @@ public class BD {
         return departments;
     }
 
+    private Time getTimeNow() {
+        Time time = Time.valueOf(LocalTime.now(ZoneId.of("UTC+04:00")));
+        return time;
+    }
+
     //получаем все доступное время для записи для определенного врача
     @SneakyThrows
     public List<Record> getAllRecords(String name, LocalDate date) {
-        String recordsRequest = "SELECT * FROM `recordsession` WHERE `id_doctor`=? AND `date`=? AND `archive`=?";
-        String doctorRequest = "SELECT `id_doctor` FROM `doctors` WHERE fio_doctor = ?";
+        String recordsRequest = "SELECT * FROM recordsession WHERE id_doctor=? AND date=? AND archive=? AND time>?";
+        String doctorRequest = "SELECT id_doctor FROM doctors WHERE fio_doctor = ?";
         PreparedStatement statementDoctors = getDbConnection().prepareStatement(doctorRequest);
         statementDoctors.setString(1, name);
         ResultSet resDoctors = statementDoctors.executeQuery();
         resDoctors.next();
 
+        Time time = getTimeNow();
+
         PreparedStatement statementRecords = getDbConnection().prepareStatement(recordsRequest);
         statementRecords.setInt(1, resDoctors.getInt("id_doctor"));
         statementRecords.setDate(2, java.sql.Date.valueOf(date));
         statementRecords.setInt(3, 0);
+        statementRecords.setTime(4, time);
 
         ResultSet resRecords = statementRecords.executeQuery();
 
@@ -291,35 +306,34 @@ public class BD {
     //возвращаем записанное значение
     @SneakyThrows(value = {SQLException.class, ClassNotFoundException.class})
     public Treatment setRecords(String time, LocalDate date, int doctorID) {
-        String updRecord = "UPDATE `recordsession` SET id_patient=?  WHERE time=? AND date=? AND id_doctor=?";
-        String trueNewRecord = "UPDATE `recordsession` SET archive=?  WHERE time=? AND date=? AND id_doctor=?";
-        String newRecord = "SELECT * FROM `recordsession` WHERE time=? AND date=? AND id_doctor=?";
-
+        String updRecord = "UPDATE recordsession SET id_patient=?  WHERE time=? AND date=? AND id_doctor=?";
+        String trueNewRecord = "UPDATE recordsession SET archive=?  WHERE time=? AND date=? AND id_doctor=?";
+        String newRecord = "SELECT * FROM recordsession WHERE time=? AND date=? AND id_doctor=?";
 
 
         PreparedStatement statement = getDbConnection().prepareStatement(updRecord);
         statement.setInt(1, user.getID());
-        statement.setTime(2, java.sql.Time.valueOf(time));
+        statement.setTime(2, java.sql.Time.valueOf(time + ":00"));
         statement.setDate(3, java.sql.Date.valueOf(date));
         statement.setInt(4, doctorID);
 
 
-            if (statement.executeUpdate() <= 0) {
-                new ControllerException(NO_NEW_RECORD_IN_BD);
+        if (statement.executeUpdate() <= 0) {
+            new ControllerException(NO_NEW_RECORD_IN_BD);
 
-            } else {
-                PreparedStatement statementNewRecord = getDbConnection().prepareStatement(trueNewRecord);
-                statementNewRecord.setInt(1, 1);
-                statementNewRecord.setTime(2, Time.valueOf(time));
-                statementNewRecord.setDate(3, java.sql.Date.valueOf(date));
-                statementNewRecord.setInt(4, doctorID);
+        } else {
+            PreparedStatement statementNewRecord = getDbConnection().prepareStatement(trueNewRecord);
+            statementNewRecord.setInt(1, 1);
+            statementNewRecord.setTime(2, Time.valueOf(time + ":00"));
+            statementNewRecord.setDate(3, java.sql.Date.valueOf(date));
+            statementNewRecord.setInt(4, doctorID);
 
-                statementNewRecord.executeUpdate();
+            statementNewRecord.executeUpdate();
 
-            }
+        }
 
         PreparedStatement newRecordStatement = getDbConnection().prepareStatement(newRecord);
-        newRecordStatement.setTime(1, Time.valueOf(time));
+        newRecordStatement.setTime(1, Time.valueOf(time + ":00"));
         newRecordStatement.setDate(2, java.sql.Date.valueOf(date));
         newRecordStatement.setInt(3, doctorID);
 
@@ -329,12 +343,12 @@ public class BD {
 
         newRecordResult.next();
 
-            newRecordObject.setId(newRecordResult.getInt("id_record"));
-            newRecordObject.setIdPatient(newRecordResult.getInt("id_patient"));
-            newRecordObject.setIdDoctor(newRecordResult.getInt("id_doctor"));
-            newRecordObject.setTime(newRecordResult.getTime("time"));
-            newRecordObject.setDate(newRecordResult.getDate("date"));
-            newRecordObject.setArchive(newRecordResult.getBoolean("archive"));
+        newRecordObject.setId(newRecordResult.getInt("id_record"));
+        newRecordObject.setIdPatient(newRecordResult.getInt("id_patient"));
+        newRecordObject.setIdDoctor(newRecordResult.getInt("id_doctor"));
+        newRecordObject.setTime(newRecordResult.getTime("time"));
+        newRecordObject.setDate(newRecordResult.getDate("date"));
+        newRecordObject.setArchive(newRecordResult.getBoolean("archive"));
 
 
         return setTreatments(newRecordObject);
@@ -342,10 +356,10 @@ public class BD {
 
     //создаем обращенение и возвращаем его
     @SneakyThrows
-    public Treatment setTreatments(Record record){
-        String setTreatment = "INSERT INTO `treatments` (id_record, id_patient, id_doctor, name_department) VALUES (?, ?, ?, ?)";
-        String getDepartment = "SELECT name_department FROM `doctors` WHERE id_doctor=?";
-        String getTreatment = "SELECT * FROM `treatments` WHERE id_record=?";
+    public Treatment setTreatments(Record record) {
+        String setTreatment = "INSERT INTO treatments (id_record, id_patient, id_doctor, name_department) VALUES (?, ?, ?, ?)";
+        String getDepartment = "SELECT name_department FROM doctors WHERE id_doctor=?";
+        String getTreatment = "SELECT * FROM treatments WHERE id_record=?";
 
         PreparedStatement getDepartmentStatement = getDbConnection().prepareStatement(getDepartment);
         getDepartmentStatement.setInt(1, record.getIdDoctor());
@@ -360,7 +374,7 @@ public class BD {
         setTreatmentStatement.setInt(3, record.getIdDoctor());
         setTreatmentStatement.setString(4, getDepartmentResult.getString("name_department"));
 
-       setTreatmentStatement.executeUpdate();
+        setTreatmentStatement.executeUpdate();
 
         PreparedStatement getTreatmentStatement = getDbConnection().prepareStatement(getTreatment);
 
@@ -369,18 +383,18 @@ public class BD {
 
         Treatment treatment = new Treatment();
 
-       while(getTreatmentResult.next()){
-           treatment.setId(getTreatmentResult.getInt("id_treatment"));
-           treatment.setIdPatient(getTreatmentResult.getInt("id_patient"));
-           treatment.setIdDoctor(getTreatmentResult.getInt("id_doctor"));
-           treatment.setNameDepartment(getTreatmentResult.getString("name_department"));
-       }
+        while (getTreatmentResult.next()) {
+            treatment.setId(getTreatmentResult.getInt("id_treatment"));
+            treatment.setIdPatient(getTreatmentResult.getInt("id_patient"));
+            treatment.setIdDoctor(getTreatmentResult.getInt("id_doctor"));
+            treatment.setNameDepartment(getTreatmentResult.getString("name_department"));
+        }
 
-       return Patient.treatment=treatment;
+        return Patient.treatment = treatment;
     }
 
     @SneakyThrows
-    public List <Treatment> getHistory(String fioPatient){
+    public List<Treatment> getHistory(String fioPatient) {
         String getIDPatient = "SELECT id_patient FROM patients WHERE fio_patient=?";
         String getTreatment = "SELECT * FROM treatments WHERE id_patient=?";
         String getDoctor = "SELECT fio_doctor FROM doctors WHERE id_doctor=?";
@@ -394,6 +408,10 @@ public class BD {
 
         getIDPatientResult.next();
 
+        if (getIDPatientResult.getRow() <= 0) {
+            new ControllerException("Пациент не найден в базе данных");
+        }
+
         //подключаемся к таблице записей
         PreparedStatement getTreatmentStatement = getDbConnection().prepareStatement(getTreatment);
         getTreatmentStatement.setString(1, getIDPatientResult.getString("id_patient"));
@@ -402,7 +420,7 @@ public class BD {
 
         List<Treatment> treatments = new ArrayList<>();
 
-        while (getTreatmentResult.next()){
+        while (getTreatmentResult.next()) {
             Treatment treatment = new Treatment();
             treatment.setId(getTreatmentResult.getInt("id_treatment"));
             treatment.setIdPatient(getTreatmentResult.getInt("id_patient"));
@@ -416,7 +434,7 @@ public class BD {
 
         PreparedStatement getDoctorStatement = getDbConnection().prepareStatement(getDoctor);
         PreparedStatement getTimeAndDateStatement = getDbConnection().prepareStatement(getTimeAndDate);
-        for(Treatment i : treatments){
+        for (Treatment i : treatments) {
             getDoctorStatement.setInt(1, i.getIdDoctor());
             getTimeAndDateStatement.setInt(1, i.getIdRecord());
 
@@ -434,16 +452,16 @@ public class BD {
     }
 
     @SneakyThrows
-    public void addComment(Treatment treatment){
+    public void addComment(Treatment treatment) {
         String setNewComment = "UPDATE treatments SET comment=? WHERE id_record=?";
 
         PreparedStatement setNewCommentStatement = getDbConnection().prepareStatement(setNewComment);
         setNewCommentStatement.setString(1, treatment.getComment());
         setNewCommentStatement.setInt(2, treatment.getIdRecord());
 
-       if(setNewCommentStatement.executeUpdate()<=0){
-           new ControllerException(NO_NEW_RECORD_IN_BD);
-       }
+        if (setNewCommentStatement.executeUpdate() <= 0) {
+            new ControllerException(NO_NEW_RECORD_IN_BD);
+        }
     }
 
     private String modifyDateLayout(java.sql.Date oldDate, java.sql.Time time) throws ParseException {
@@ -452,38 +470,37 @@ public class BD {
         return new SimpleDateFormat("dd.MM.yyyy HH:mm").format(newDate);
     }
 
-  @SneakyThrows
-  public void addJob(String fioDoctor, Time bgTime, Time endTime, LocalDate date){
-        String newJob = "INSERT INTO `recordsession` (id_doctor, date, time) VALUES (?, ?, ?)";
+    @SneakyThrows
+    public void addJob(String fioDoctor, Time bgTime, Time endTime, LocalDate date) {
+        String newJob = "INSERT INTO recordsession (id_doctor, date, time) VALUES (?, ?, ?)";
 
-      LocalTime endLocalTime = endTime.toLocalTime();
-      LocalTime beginLocalTime = bgTime.toLocalTime();
-      long duration = Duration.between(beginLocalTime, endLocalTime).toMinutes();
+        LocalTime endLocalTime = endTime.toLocalTime();
+        LocalTime beginLocalTime = bgTime.toLocalTime();
+        long duration = Duration.between(beginLocalTime, endLocalTime).toMinutes();
 
-      PreparedStatement newJobStatement = getDbConnection().prepareStatement(newJob);
+        PreparedStatement newJobStatement = getDbConnection().prepareStatement(newJob);
 
-      for(int i = 0; i<duration; i=i+15){
-          newJobStatement.setInt(1, getDoctor(fioDoctor).getID());
-          newJobStatement.setDate(2, java.sql.Date.valueOf(date));
+        for (int i = 0; i < duration; i = i + 15) {
+            newJobStatement.setInt(1, getDoctor(fioDoctor).getID());
+            newJobStatement.setDate(2, java.sql.Date.valueOf(date));
 
-          long hoursInMinute = beginLocalTime.getHour()*60;
-          long newMinute = beginLocalTime.getMinute()+hoursInMinute+i;
-          newJobStatement.setTime(3, Time.valueOf(parseHours(newMinute)));
-          newJobStatement.executeUpdate();
-      }
-  }
+            long hoursInMinute = beginLocalTime.getHour() * 60;
+            long newMinute = beginLocalTime.getMinute() + hoursInMinute + i;
+            newJobStatement.setTime(3, Time.valueOf(parseHours(newMinute)));
+            newJobStatement.executeUpdate();
+        }
+    }
 
 
-  private LocalTime parseHours(long ing){
+    private LocalTime parseHours(long ing) {
         int newInt;
-        if(ing%60==0){
-            newInt=(int)ing/60;
-            return LocalTime.of(newInt,00);
+        if (ing % 60 == 0) {
+            newInt = (int) ing / 60;
+            return LocalTime.of(newInt, 00);
+        } else {
+            newInt = (int) Math.floor(ing / 60);
+            return LocalTime.of(newInt, (int) (ing - (newInt * 60)));
         }
-        else{
-           newInt=(int)Math.floor(ing/60);
-           return LocalTime.of(newInt,(int) (ing-(newInt*60)));
-        }
-  }
+    }
 }
 

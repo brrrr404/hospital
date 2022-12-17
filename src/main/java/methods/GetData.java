@@ -4,10 +4,10 @@ import javafx.collections.ObservableList;
 
 public interface GetData {
 
-    public ObservableList<String> getNameDoctorFilter(String nameDepartment);
+     ObservableList<String> getNameDoctorFilter(String nameDepartment);
 
-    public ObservableList<String> choiceDoctorsList();
+     ObservableList<String> choiceDoctorsList();
 
-    public ObservableList<String> choiceDepartmentList();
+     ObservableList<String> choiceDepartmentList();
 
 }

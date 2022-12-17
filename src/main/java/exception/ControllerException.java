@@ -35,8 +35,4 @@ public class ControllerException extends RuntimeException {
 
         alert.showAndWait();
     }
-
-
-
-
 }

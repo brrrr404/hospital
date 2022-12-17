@@ -50,8 +50,8 @@
     <orderEntry type="library" name="Maven: org.springframework:spring-jcl:5.3.17" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-beans:5.3.17" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-tx:5.3.17" level="project" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-base:17.0.0.1" level="project" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-base:win:17.0.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-base:18" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-base:win:18" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter-engine:5.7.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.junit.platform:junit-platform-engine:1.7.1" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains:annotations:23.0.0" level="project" />
